@@ -1,25 +1,48 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 import time
+import undetected_chromedriver as uc
 
-# Ganti dengan URL faucet dan alamat kamu
-FAUCET_URL = 'https://faucet.omni.network/base-sepolia'
-MY_ADDRESS = '0xc741e8d3dbde1255e2961df114ccc66075c5a6d5'
+FAUCET_URL = "https://faucet.omni.network/base-sepolia"
+CLAIM_INTERVAL = 3 * 60 * 60  # 3 hours in seconds
 
 def claim_faucet():
-    try:
-        data = {'address': MY_ADDRESS}
-        response = requests.post(FAUCET_URL, json=data)
-        
-        if response.status_code == 200:
-            print("✅ Klaim faucet berhasil:", response.json())
-        else:
-            print("❌ Gagal klaim:", response.status_code, response.text)
-    except Exception as e:
-        print("⚠️ Error saat klaim:", str(e))
+    print("Launching browser...")
+    options = uc.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    
+    driver = uc.Chrome(options=options)
+    driver.get(FAUCET_URL)
+    print("Opened faucet page.")
 
-# Loop terus-menerus setiap 3 jam
-while True:
-    print("🚀 Klaim faucet dimulai...")
-    claim_faucet()
-    print("⏳ Menunggu 3 jam sebelum klaim berikutnya...\n")
-    time.sleep(3 * 60 * 60)  # 3 jam dalam detik
+    time.sleep(10)  # Tunggu semua elemen termuat (atau bisa ditingkatkan dengan WebDriverWait)
+
+    try:
+        # Klik tombol connect wallet (jika ada)
+        connect_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Connect Wallet')]")
+        connect_btn.click()
+        print("Clicked Connect Wallet")
+        time.sleep(5)
+
+        # Di sini kamu perlu manual connect MetaMask atau integrasikan MetaMask handler (kompleks dan berisiko)
+        input("Silakan login wallet & authorize faucet (tekan Enter jika sudah)...")
+
+        # Klik tombol Claim
+        claim_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Claim')]")
+        claim_btn.click()
+        print("Clicked Claim Button")
+
+        time.sleep(10)  # Tunggu transaksi selesai
+        print("Claim successful (assuming no CAPTCHA)")
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+    driver.quit()
+
+if __name__ == "__main__":
+    while True:
+        claim_faucet()
+        print(f"Waiting 3 hours for next claim...")
+        time.sleep(CLAIM_INTERVAL)
