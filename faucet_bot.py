@@ -31,5 +31,5 @@ while True:
         log(f"⚠️ Gagal klaim: {response.status_code}")
         log(f"Respon: {response.text}")
 
-    log("🕒 Menunggu 3 jam untuk klaim berikutnya...\n")
-    time.sleep(3 * 60 * 60)  # 3 jam
+    log("🕒 Menunggu 30 menit untuk klaim berikutnya...\n")
+    time.sleep(30 * 60)  # 30 menit
