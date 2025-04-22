@@ -1,5 +1,6 @@
 import requests
 import time
+from datetime import datetime
 
 url = "https://faucet.omni.network/base-sepolia?_data=routes%2Fbase-sepolia"
 address = "0x30e25eaa01f60acf52470ccfc57cad3e245b43c9"
@@ -13,15 +14,22 @@ headers = {
 
 data = f"account={address}"
 
+def log(message):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("log.txt", "a") as f:
+        f.write(f"[{timestamp}] {message}\n")
+    print(message)
+
 while True:
-    print("🚀 Mengirim permintaan faucet...")
+    log("🚀 Mengirim permintaan faucet...")
     response = requests.post(url, headers=headers, data=data)
 
     if response.status_code == 200:
-        print("✅ Klaim berhasil atau diterima!")
+        log("✅ Klaim berhasil atau diterima!")
+        log(f"Respon: {response.text}")
     else:
-        print(f"⚠️ Gagal klaim: {response.status_code}")
-        print(response.text)
+        log(f"⚠️ Gagal klaim: {response.status_code}")
+        log(f"Respon: {response.text}")
 
-    print("🕒 Menunggu 3 jam untuk klaim berikutnya...")
+    log("🕒 Menunggu 3 jam untuk klaim berikutnya...\n")
     time.sleep(3 * 60 * 60)  # 3 jam
