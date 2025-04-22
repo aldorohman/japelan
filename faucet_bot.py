@@ -1,36 +1,27 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
+import requests
 import time
 
-CHROMEDRIVER_PATH = './chromedriver'  # atau path lengkap kalau di luar folder
-FAUCET_URL = 'https://faucet.omni.network/base-sepolia'  # Ganti dengan URL faucet kamu
-MY_ADDRESS = '0xc741e8d3dbde1255e2961df114ccc66075c5a6d5'
+url = "https://faucet.omni.network/base-sepolia?_data=routes%2Fbase-sepolia"
+address = "0x30e25eaa01f60acf52470ccfc57cad3e245b43c9"
 
-def claim_faucet():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # hilangkan ini kalau mau lihat browser-nya
-    driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=options)
+headers = {
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    "Origin": "https://faucet.omni.network",
+    "Referer": "https://faucet.omni.network/base-sepolia",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+}
 
-    try:
-        driver.get(FAUCET_URL)
+data = f"account={address}"
 
-        # Ganti selector sesuai form faucet-nya
-        address_input = driver.find_element(By.NAME, "address")
-        address_input.send_keys(MY_ADDRESS)
-
-        claim_button = driver.find_element(By.ID, "claimButton")
-        claim_button.click()
-
-        print("✅ Klaim berhasil!")
-    except Exception as e:
-        print("⚠️ Error:", str(e))
-    finally:
-        driver.quit()
-
-# Loop setiap 3 jam
 while True:
-    print("🚀 Klaim faucet dimulai...")
-    claim_faucet()
-    print("⏳ Menunggu 3 jam...\n")
-    time.sleep(3 * 60 * 60)
+    print("🚀 Mengirim permintaan faucet...")
+    response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code == 200:
+        print("✅ Klaim berhasil atau diterima!")
+    else:
+        print(f"⚠️ Gagal klaim: {response.status_code}")
+        print(response.text)
+
+    print("🕒 Menunggu 3 jam untuk klaim berikutnya...")
+    time.sleep(3 * 60 * 60)  # 3 jam
